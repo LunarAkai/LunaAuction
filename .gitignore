@@ -5,7 +5,7 @@
 *.ipr
 *.iws
 
-dbconfig.yml
+src/main/resources/config.yml
 
 # IntelliJ
 out/

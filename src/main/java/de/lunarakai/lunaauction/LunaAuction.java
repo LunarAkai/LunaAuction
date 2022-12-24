@@ -6,7 +6,6 @@ import de.lunarakai.lunaauction.sql.Database;
 import de.lunarakai.lunaauction.utils.CommandRegistration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.logging.Logger;
@@ -19,7 +18,6 @@ public final class LunaAuction extends JavaPlugin {
     private CommandRegistration commandRegistration;
     private Database database;
 
-
     @Override
     public void onEnable() {
 
@@ -27,6 +25,8 @@ public final class LunaAuction extends JavaPlugin {
         plugin = this;
         commandRegistration = new CommandRegistration();
         database = new Database();
+
+        this.saveDefaultConfig();
 
         //Connect to Database
         try {
