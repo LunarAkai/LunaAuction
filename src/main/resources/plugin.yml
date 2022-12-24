@@ -1,0 +1,14 @@
+name: LunaAuction
+version: '${project.version}'
+main: de.lunarakai.lunaauction.LunaAuction
+api-version: 1.19
+authors: [ LunarAkai ]
+website: https://www.lunarakai.de
+commands:
+  auction:
+    description: Base Command
+    usage: /<command>
+permissions:
+  lunaauctions.*:
+    description: Gives access to all LunaAuction commands
+    default: op
