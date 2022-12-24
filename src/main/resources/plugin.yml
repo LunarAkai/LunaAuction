@@ -4,6 +4,7 @@ main: de.lunarakai.lunaauction.LunaAuction
 api-version: 1.19
 authors: [ LunarAkai ]
 website: https://www.lunarakai.de
+prefix: LAuction
 commands:
   auction:
     description: Base Command

@@ -15,7 +15,7 @@ public class AuctionTabCompleter implements TabCompleter {
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length == 1) {
-            return StringUtil.copyPartialMatches(args[0], Arrays.asList("help", "info"), new ArrayList<>());
+            return StringUtil.copyPartialMatches(args[0], Arrays.asList("help"), new ArrayList<>());
         }
         return new ArrayList<>();
     }

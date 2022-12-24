@@ -1,5 +1,6 @@
-package de.lunarakai.lunaauction;
+package de.lunarakai.lunaauction.utils;
 
+import de.lunarakai.lunaauction.LunaAuction;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
 
