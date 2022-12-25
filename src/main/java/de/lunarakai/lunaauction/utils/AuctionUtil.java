@@ -1,9 +1,7 @@
 package de.lunarakai.lunaauction.utils;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
+import de.lunarakai.lunaauction.LunaAuction;
 import de.lunarakai.lunaauction.sql.DatabaseQueries;
 import org.bukkit.inventory.ItemStack;
 
@@ -18,23 +16,38 @@ public class AuctionUtil {
     }
 
     public static ItemStack searchForAuctionedItem(Integer id) throws SQLException {
-        ItemStack itemStack;
+        ItemStack itemStack = null;
+        String jsonString;
 
         ResultSet resultSet = DatabaseQueries.equalsQuery("itemStack", "auctions", "auctionID", String.valueOf(id));
 
-        String jsonString = String.valueOf(resultSet.next());
-        jsonString = jsonString.replace("=",":");
+        if(resultSet.next()) {
+            jsonString = resultSet.getString(1);
 
+            Map<String, Object> _itemStack = createHashMapFromJsonString(jsonString);
+            LunaAuction.LOGGER.info(_itemStack.toString());
 
-        Map<String, Object> _itemStack = createHashMapFromJsonString(jsonString);
-        itemStack = ItemUtil.deserialize(_itemStack);
-
+            try {
+                itemStack = ItemUtil.deserialize(_itemStack);
+            } catch (ClassCastException e) {
+                LunaAuction.LOGGER.warning(String.valueOf(e));
+            }
+        }
+        //jsonString = jsonString.replace("=",":");
         return itemStack;
     }
 
     public static HashMap<String, Object> createHashMapFromJsonString(String json) {
+        JsonObject object = null;
 
-        JsonObject object = JsonParser.parseString(json).getAsJsonObject();
+        LunaAuction.LOGGER.info(json);
+        
+        try {
+            object = JsonParser.parseString(json).getAsJsonObject();
+        } catch (IllegalStateException | JsonParseException e) {
+            LunaAuction.LOGGER.warning(String.valueOf(e));
+        }
+        
         Set<Map.Entry<String, JsonElement>> set = object.entrySet();
         Iterator<Map.Entry<String, JsonElement>> iterator = set.iterator();
         HashMap<String, Object> map = new HashMap<String, Object>();

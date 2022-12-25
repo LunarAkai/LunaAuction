@@ -1,5 +1,6 @@
 package de.lunarakai.lunaauction.commands.auction.admin;
 
+import de.lunarakai.lunaauction.LunaAuction;
 import de.lunarakai.lunaauction.utils.AuctionUtil;
 import de.lunarakai.lunaauction.utils.ChatBuilder;
 import org.bukkit.entity.Player;
@@ -17,7 +18,12 @@ public class CommandAdminCopy {
         if(resultSet.next()) {
             //Query for ItemStack in AuctionTable and give a copy of the itemstack to the player
             ItemStack itemResult = AuctionUtil.searchForAuctionedItem(Integer.valueOf(auctionId));
-            player.getInventory().addItem(itemResult);
+            try{
+                player.getInventory().addItem(itemResult);
+            } catch (IllegalArgumentException e) {
+                chatBuilder.sendWarningMessage(player, String.valueOf(e));
+                LunaAuction.LOGGER.warning(String.valueOf(e));
+            }
 
         } else {
             chatBuilder.sendWarningMessage(player, "Not a valid auctionId");
