@@ -2,6 +2,7 @@ package de.lunarakai.lunaauction;
 
 import de.lunarakai.lunaauction.commands.CommandAuction;
 import de.lunarakai.lunaauction.commands.tabcompleter.AuctionTabCompleter;
+import de.lunarakai.lunaauction.events.AuctionEventListener;
 import de.lunarakai.lunaauction.sql.Database;
 import de.lunarakai.lunaauction.utils.CommandRegistration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -16,7 +17,6 @@ public final class LunaAuction extends JavaPlugin {
     private static LunaAuction plugin;
     public static String CHAT_PREFIX = "[LAuction]";
     private CommandRegistration commandRegistration;
-    private Database database;
 
     @Override
     public void onEnable() {
@@ -24,17 +24,18 @@ public final class LunaAuction extends JavaPlugin {
         LOGGER = getLogger();
         plugin = this;
         commandRegistration = new CommandRegistration();
-        database = new Database();
 
         this.saveDefaultConfig();
 
         //Connect to Database
         try {
-            database.connect();
+            Database.connect();
         } catch (SQLException | IOException e) {
             throw new RuntimeException(e);
         }
-        getLogger().info("Database Connection: " + database.isConnected());
+        getLogger().info("Database Connection: " + Database.isConnected());
+
+        getServer().getPluginManager().registerEvents(new AuctionEventListener(), this);
 
         //Command Registration
         commandRegistration.registerCommand(this, new CommandAuction(), "auction", new AuctionTabCompleter());
@@ -44,7 +45,7 @@ public final class LunaAuction extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        database.disconnect();
+        Database.disconnect();
 
         getLogger().info("Plugin unloaded successfully!");
     }
