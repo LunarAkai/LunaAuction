@@ -1,6 +1,7 @@
 package de.lunarakai.lunaauction.commands;
 
 import de.lunarakai.lunaauction.LunaAuction;
+import de.lunarakai.lunaauction.commands.auction.CommandAuctionAdmin;
 import de.lunarakai.lunaauction.commands.auction.CommandAuctionBid;
 import de.lunarakai.lunaauction.events.customevents.AuctionCreateEvent;
 import de.lunarakai.lunaauction.utils.ChatBuilder;
@@ -30,8 +31,14 @@ public class CommandAuction implements CommandExecutor {
 
                 if(args.length > 0) {
                     if(args[0].equalsIgnoreCase("bid")) {
-                        CommandAuctionBid auctionBid = new CommandAuctionBid();
-                        auctionBid.bidCommand(args[1], args[2], PlayerUtil.getUuid(player));
+                        try {
+                            if(!args[1].isEmpty() && !args[2].isEmpty()) {
+                                CommandAuctionBid auctionBid = new CommandAuctionBid();
+                                auctionBid.bidCommand(args[1], args[2], PlayerUtil.getUuid(player));
+                            }
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            chatBuilder.sendErrorMessage(player, "You need to enter a valid auctionId and/or bidding price!");
+                        }
                     } else if(args[0].equalsIgnoreCase("help")) {
                         chatBuilder.sendDefaultMessage(player, "there is no help");
                     } else if(args[0].equalsIgnoreCase("create")) {
@@ -52,6 +59,11 @@ public class CommandAuction implements CommandExecutor {
                             chatBuilder.sendErrorMessage(player, "IOException");
                             LunaAuction.LOGGER.warning(String.valueOf(e));
                         }
+                    } else if(args[0].equalsIgnoreCase("admin")) {
+                        CommandAuctionAdmin auctionAdmin = new CommandAuctionAdmin();
+                        auctionAdmin.adminCommand(args, player);
+                    } else {
+                        chatBuilder.sendWarningMessage(player, "Not a valid command!");
                     }
                 } else {
                     chatBuilder.sendDefaultMessage(player,

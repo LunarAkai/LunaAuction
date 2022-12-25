@@ -1,6 +1,5 @@
 package de.lunarakai.lunaauction.sql;
 
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 
 import java.sql.PreparedStatement;
@@ -12,7 +11,7 @@ public class DatabaseInsertion {
 
     public void insertData(String intoTable, String column1, String column2, String column3, String column4,
                            Integer id, PersistentDataContainer persistentDataContainer,
-                           Integer price, ItemStack itemStack) throws SQLException {
+                           Integer price, String itemStack) throws SQLException {
         String sql = "insert into " + intoTable + " (" + column1 + ", " + column2 + ", " + column3 + ", " + column4+ ") "+ " values (?,?,?,?)";
         PreparedStatement preparedStatement = Database.connection.prepareStatement(sql);
         preparedStatement.setInt(1, id);

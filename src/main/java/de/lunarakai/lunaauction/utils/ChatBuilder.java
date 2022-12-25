@@ -3,7 +3,6 @@ package de.lunarakai.lunaauction.utils;
 import de.lunarakai.lunaauction.LunaAuction;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.inventory.ItemStack;
 
 
 public class ChatBuilder {
@@ -14,7 +13,7 @@ public class ChatBuilder {
     public void sendSuccessMessage(CommandSender player, String message) {
         player.sendMessage(ChatColor.valueOf("GOLD") + LunaAuction.CHAT_PREFIX + ChatColor.valueOf("GREEN") + " " + message);
     }
-    public void sendSuccessfulAuctionCreationMessage(CommandSender player, ItemStack itemStack, Integer price) {
+    public void sendSuccessfulAuctionCreationMessage(CommandSender player, String itemStack, Integer price) {
 
         player.sendMessage(ChatColor.valueOf("GOLD") + LunaAuction.CHAT_PREFIX + ChatColor.valueOf("WHITE") +
                 " You have put " + ChatColor.YELLOW + itemStack + " " + ChatColor.WHITE +

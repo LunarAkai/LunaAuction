@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,10 +27,9 @@ public class AuctionCreateEvent extends Event implements Cancellable {
     private UUID uuid = null;
     private boolean isCancelled;
     private Integer playerId;
-    private ItemStack itemStack;
+    private String itemStack;
     private PersistentDataContainer itemData;
     private int currentPrice = 0;
-    private ItemUtil itemUtil = new ItemUtil();
 
     public static HandlerList getHandlerList() {
         return HANDLERS;
@@ -56,9 +54,9 @@ public class AuctionCreateEvent extends Event implements Cancellable {
             Player player = Objects.requireNonNull(Bukkit.getPlayer(UUID.fromString(String.valueOf(uuid))));
 
             //Item Data from Item in Main Hand
-            if(itemUtil.getItemNBTInHand(uuid) != null){
-                this.itemStack = itemUtil.getItemNameInHand(uuid);
-                this.itemData = itemUtil.getItemNBTInHand(uuid).getPersistentDataContainer();
+            if(ItemUtil.getItemNBTInHand(uuid) != null){
+                this.itemStack = ItemUtil.serialize(ItemUtil.getItemNameInHand(uuid));
+                this.itemData = ItemUtil.getItemNBTInHand(uuid).getPersistentDataContainer();
                 createAuctionEntry(playerId, itemStack, itemData, currentPrice);
 
 
@@ -106,7 +104,7 @@ public class AuctionCreateEvent extends Event implements Cancellable {
         Database.insertPlayerData("players", _Uuid, _playerName);
     }
 
-    private void createAuctionEntry(Integer _playerID, ItemStack _itemStack, PersistentDataContainer _itemNBT, Integer _currentPrice) {
+    private void createAuctionEntry(Integer _playerID, String _itemStack, PersistentDataContainer _itemNBT, Integer _currentPrice) {
         Database.insertAuctionData("auctions", _playerID, _itemStack, _itemNBT, _currentPrice);
     }
 

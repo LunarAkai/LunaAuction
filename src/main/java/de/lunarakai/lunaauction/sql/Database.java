@@ -1,8 +1,6 @@
 package de.lunarakai.lunaauction.sql;
 
 import de.lunarakai.lunaauction.LunaAuction;
-import net.kyori.adventure.text.NBTComponent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 
 import java.io.IOException;
@@ -63,7 +61,7 @@ public class Database {
     }
 
     //TODO
-    public static void insertAuctionData(String table, Integer playerID, ItemStack itemStack, PersistentDataContainer item, Integer currentPrice) {
+    public static void insertAuctionData(String table, Integer playerID, String itemStack, PersistentDataContainer item, Integer currentPrice) {
         try {
             insertion.insertData(table, "playerID", "item", "currentPrice", "itemStack",
                     playerID, item, currentPrice, itemStack);
