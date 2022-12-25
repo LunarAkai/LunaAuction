@@ -13,67 +13,12 @@ import java.util.*;
 
 public class ItemUtil {
 
-    public static String serialize(ItemStack item){
-        StringBuilder builder = new StringBuilder();
-        builder.append(item.getType().toString());
-        if(item.getItemMeta().hasDestroyableKeys()) {
-            builder.append(":" + item.getItemMeta().getDestroyableKeys());
-        }
-        builder.append(" " + item.getAmount());
-        for(Enchantment enchant:item.getEnchantments().keySet()) {
-            builder.append(" " + enchant.getKey() + ":" + item.getEnchantments().get(enchant));
-        }
-        String name = getName(item);
-        if(name != null ) builder.append(" name:" + name);
-        Color color = getArmorColor(item);
-        if(color != null) builder.append(" rgb:" + color.getRed() + "|" + color.getGreen() + "|" + color.getBlue());
-        String owner = getOwner(item);
-        if(owner != null) builder.append(" owner:" + owner);
-
-        return builder.toString();
+    public static Map<String, Object> serialize(ItemStack item){
+        return item.serialize();
     }
 
-    public static ItemStack deserialize(String serializedItem){
-        String[] strings = serializedItem.split(" ");
-        Map<Enchantment, Integer> enchants = new HashMap<Enchantment, Integer>();
-        String[] args;
-        ItemStack item = new ItemStack(Material.AIR);
-        for(String str: strings){
-            args = str.split(":");
-            if(Material.matchMaterial(args[0]) != null && item.getType() == Material.AIR){
-                item.setType(Material.matchMaterial(args[0]));
-                if(args.length == 2) {
-
-                }
-                break;
-            }
-        }
-        if (item.getType() == Material.AIR) {
-            Bukkit.getLogger().info("Could not find a valid material for the item in \"" + serializedItem + "\"");
-            return null;
-        }
-        for(String str:strings){
-            args = str.split(":", 2);
-            if(isNumber(args[0])) item.setAmount(Integer.parseInt(args[0]));
-            if(args.length == 1) continue;
-            if(args[0].equalsIgnoreCase("name")){
-                setName(item, ChatColor.translateAlternateColorCodes('&', args[1]));
-                continue;
-            }
-            if(args[0].equalsIgnoreCase("rgb")){
-                setArmorColor(item, args[1]);
-                continue;
-            }
-            if(args[0].equalsIgnoreCase("owner")){
-                setOwner(item, args[1]);
-                continue;
-            }
-            if(Enchantment.getByKey(NamespacedKey.minecraft(args[0].toUpperCase())) != null){
-                enchants.put(Enchantment.getByKey(NamespacedKey.minecraft(args[0].toUpperCase())), Integer.parseInt(args[1]));
-            }
-        }
-        item.addUnsafeEnchantments(enchants);
-        return item.getType().equals(Material.AIR) ? null : item;
+    public static ItemStack deserialize(Map<String, Object> serializedItem){
+        return ItemStack.deserialize(serializedItem);
     }
 
     public static String getName(ItemStack item) {

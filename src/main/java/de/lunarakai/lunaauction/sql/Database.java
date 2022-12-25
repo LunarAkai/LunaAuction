@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.UUID;
 
 public class Database {
@@ -61,7 +62,7 @@ public class Database {
     }
 
     //TODO
-    public static void insertAuctionData(String table, Integer playerID, String itemStack, PersistentDataContainer item, Integer currentPrice) {
+    public static void insertAuctionData(String table, Integer playerID, Map<String, Object> itemStack, PersistentDataContainer item, Integer currentPrice) {
         try {
             insertion.insertData(table, "playerID", "item", "currentPrice", "itemStack",
                     playerID, item, currentPrice, itemStack);

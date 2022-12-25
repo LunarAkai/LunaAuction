@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -27,7 +28,7 @@ public class AuctionCreateEvent extends Event implements Cancellable {
     private UUID uuid = null;
     private boolean isCancelled;
     private Integer playerId;
-    private String itemStack;
+    private Map<String, Object> itemStack;
     private PersistentDataContainer itemData;
     private int currentPrice = 0;
 
@@ -65,7 +66,7 @@ public class AuctionCreateEvent extends Event implements Cancellable {
 
                 ChatBuilder chatBuilder = new ChatBuilder();
                 chatBuilder.sendSuccessMessage(player, "Auction successfully created!");
-                chatBuilder.sendSuccessfulAuctionCreationMessage(player, itemStack, currentPrice);
+                //chatBuilder.sendSuccessfulAuctionCreationMessage(player, itemStack, currentPrice);
 
 
             } else {
@@ -86,14 +87,6 @@ public class AuctionCreateEvent extends Event implements Cancellable {
         }
     }
 
-    public UUID getUuid() {
-        return uuid;
-    }
-
-    public String getPlayerName() {
-        return playerName;
-    }
-
     private Integer getPlayerIDInDatabase(UUID _uuid) throws SQLException {
         playerId = Database.getIdFromTable(_uuid);
 
@@ -104,7 +97,7 @@ public class AuctionCreateEvent extends Event implements Cancellable {
         Database.insertPlayerData("players", _Uuid, _playerName);
     }
 
-    private void createAuctionEntry(Integer _playerID, String _itemStack, PersistentDataContainer _itemNBT, Integer _currentPrice) {
+    private void createAuctionEntry(Integer _playerID, Map<String, Object> _itemStack, PersistentDataContainer _itemNBT, Integer _currentPrice) {
         Database.insertAuctionData("auctions", _playerID, _itemStack, _itemNBT, _currentPrice);
     }
 
