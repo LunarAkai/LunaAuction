@@ -2,8 +2,8 @@ package de.lunarakai.lunaauction.commands.auction;
 
 import de.lunarakai.lunaauction.LunaAuction;
 import de.lunarakai.lunaauction.sql.DatabaseUpdate;
-import de.lunarakai.lunaauction.utils.AuctionUtil;
-import de.lunarakai.lunaauction.utils.ChatBuilder;
+import de.lunarakai.lunaauction.utils.auction.AuctionUtil;
+import de.lunarakai.lunaauction.utils.playerinteraction.ChatBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -24,7 +24,7 @@ public class CommandAuctionBid {
                         int biddingPrice = Integer.parseInt(argPrice);
 
                         //Check if auctionID exists
-                        ResultSet resultSet = AuctionUtil.checkForAuctionId(id);
+                        ResultSet resultSet = AuctionUtil.getAuctionId(id);
                         if(resultSet.next()) {
                             //update currentPrice for auctionID
                             DatabaseUpdate.insertData("auctions", "currentPrice", "auctionID", id, biddingPrice);

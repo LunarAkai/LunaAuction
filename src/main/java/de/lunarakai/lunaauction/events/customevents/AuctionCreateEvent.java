@@ -3,8 +3,8 @@ package de.lunarakai.lunaauction.events.customevents;
 import de.lunarakai.lunaauction.LunaAuction;
 import de.lunarakai.lunaauction.sql.Database;
 import de.lunarakai.lunaauction.sql.DatabaseQueries;
-import de.lunarakai.lunaauction.utils.ChatBuilder;
-import de.lunarakai.lunaauction.utils.ItemUtil;
+import de.lunarakai.lunaauction.utils.playerinteraction.ChatBuilder;
+import de.lunarakai.lunaauction.utils.playerinteraction.ItemUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -56,7 +56,7 @@ public class AuctionCreateEvent extends Event implements Cancellable {
 
             //Item Data from Item in Main Hand
             if(ItemUtil.getItemNBTInHand(uuid) != null){
-                this.itemStack = ItemUtil.serialize(ItemUtil.getItemNameInHand(uuid));
+                this.itemStack = ItemUtil.serialize(ItemUtil.getItemInHand(uuid));
                 this.itemData = ItemUtil.getItemNBTInHand(uuid).getPersistentDataContainer();
                 createAuctionEntry(playerId, itemStack, itemData, currentPrice);
 

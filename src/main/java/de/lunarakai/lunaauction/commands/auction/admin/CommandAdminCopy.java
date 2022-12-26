@@ -1,8 +1,8 @@
 package de.lunarakai.lunaauction.commands.auction.admin;
 
 import de.lunarakai.lunaauction.LunaAuction;
-import de.lunarakai.lunaauction.utils.AuctionUtil;
-import de.lunarakai.lunaauction.utils.ChatBuilder;
+import de.lunarakai.lunaauction.utils.auction.AuctionUtil;
+import de.lunarakai.lunaauction.utils.playerinteraction.ChatBuilder;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -14,10 +14,10 @@ public class CommandAdminCopy {
     ChatBuilder chatBuilder = new ChatBuilder();
 
     public void copyItemFromAuction(String auctionId, Player player) throws SQLException {
-        ResultSet resultSet = AuctionUtil.checkForAuctionId(Integer.valueOf(auctionId));
+        ResultSet resultSet = AuctionUtil.getAuctionId(Integer.valueOf(auctionId));
         if(resultSet.next()) {
             //Query for ItemStack in AuctionTable and give a copy of the itemstack to the player
-            ItemStack itemResult = AuctionUtil.searchForAuctionedItem(Integer.valueOf(auctionId));
+            ItemStack itemResult = AuctionUtil.getAuctionedItem(Integer.valueOf(auctionId));
             try{
                 player.getInventory().addItem(itemResult);
             } catch (IllegalArgumentException e) {

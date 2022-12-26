@@ -1,4 +1,4 @@
-package de.lunarakai.lunaauction.utils;
+package de.lunarakai.lunaauction.utils.playerinteraction;
 
 import de.lunarakai.lunaauction.LunaAuction;
 import org.bukkit.ChatColor;

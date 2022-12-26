@@ -4,7 +4,7 @@ import de.lunarakai.lunaauction.commands.CommandAuction;
 import de.lunarakai.lunaauction.commands.tabcompleter.AuctionTabCompleter;
 import de.lunarakai.lunaauction.events.AuctionEventListener;
 import de.lunarakai.lunaauction.sql.Database;
-import de.lunarakai.lunaauction.utils.CommandRegistration;
+import de.lunarakai.lunaauction.utils.playerinteraction.CommandRegistration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
@@ -12,6 +12,8 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 
 public final class LunaAuction extends JavaPlugin {
+
+    //Vault API (Economy) - EssentialsX
 
     public static Logger LOGGER;
     private static LunaAuction plugin;
