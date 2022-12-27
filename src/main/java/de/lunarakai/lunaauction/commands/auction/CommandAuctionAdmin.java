@@ -3,6 +3,7 @@ package de.lunarakai.lunaauction.commands.auction;
 import de.lunarakai.lunaauction.LunaAuction;
 import de.lunarakai.lunaauction.commands.auction.admin.CommandAdminCopy;
 import de.lunarakai.lunaauction.commands.auction.admin.CommandAdminDeserialize;
+import de.lunarakai.lunaauction.commands.auction.admin.CommandAdminGetText;
 import de.lunarakai.lunaauction.commands.auction.admin.CommandAdminSerialize;
 import de.lunarakai.lunaauction.utils.playerinteraction.ChatBuilder;
 import de.lunarakai.lunaauction.utils.playerinteraction.ItemUtil;
@@ -35,6 +36,9 @@ public class CommandAuctionAdmin {
             } else if(args[1].equalsIgnoreCase("deserialize")) {
                 CommandAdminDeserialize adminDeserialize = new CommandAdminDeserialize();
                 adminDeserialize.deserializeWithoutItem(args[2], player);
+            } else if(args[1].equalsIgnoreCase("sertext")) {
+                CommandAdminGetText commandAdminGetText = new CommandAdminGetText();
+                commandAdminGetText.getSerializedTextOfItemInHand(player);
             } else {
                 chatBuilder.sendWarningMessage(player, "Not a valid auction admin command");
             }

@@ -105,7 +105,9 @@ public interface ItemUtil {
                     JsonObject extraMeta = new JsonObject();
                     JsonArray storedEnchants = new JsonArray();
                     esMeta.getStoredEnchants().forEach(((enchantment, integer) -> {
-                        storedEnchants.add(new JsonPrimitive(enchantment.getKey().asString()) + "//" + integer);
+                        NamespacedKey key = enchantment.getKey();
+                        String stringKey = key.toString().replace(key.namespace() + ":", "");
+                        storedEnchants.add(new JsonPrimitive(stringKey + ":" + integer));
                     }));
                     extraMeta.add("stored-enchants", storedEnchants);
                     metaJson.add("extra-meta", extraMeta);
@@ -285,10 +287,6 @@ public interface ItemUtil {
                         });
                         meta.setLore(lore);
                     }
-
-                    LunaAuction.LOGGER.info("Enchants is jsonArray: " + enchants.isJsonArray() );
-                    LunaAuction.LOGGER.info("Enchants isn't null: " + (enchants != null));
-                    LunaAuction.LOGGER.info("Enchants value is: " + enchants);
                     if (enchants != null && enchants.isJsonArray()) {
                         JsonArray jarray = enchants.getAsJsonArray();
                         jarray.forEach(jsonElement -> {
@@ -297,17 +295,15 @@ public interface ItemUtil {
                                 if (enchantString.contains(":")) {
                                     try {
                                         String[] splitEnchant = enchantString.split(":");
-                                        Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(splitEnchant[0]));
-                                        int level = Integer.parseInt(splitEnchant[1]);
-                                        if (enchantment != null && level > 0) {
-                                            meta.addEnchant(enchantment, level, true);
-                                        }
+                                        meta.addEnchant(Enchantment.getByKey(NamespacedKey.minecraft(splitEnchant[0])), Integer.parseInt(splitEnchant[1]), true);
                                     } catch (NumberFormatException ex) {
+                                        LunaAuction.LOGGER.warning("PAAAAAAAIN: " + ex);
                                     }
                                 }
                             }
                         });
                     }
+
                     if (flagsElement != null && flagsElement.isJsonArray()) {
                         JsonArray jsonArray = flagsElement.getAsJsonArray();
                         jsonArray.forEach(jsonElement -> {
@@ -323,6 +319,8 @@ public interface ItemUtil {
                     }
                     for (String clazz : BYPASS_CLASS) {
                         if (meta.getClass().getSimpleName().equalsIgnoreCase(clazz)) {
+                            LunaAuction.LOGGER.info("Extra-meta is getting bypassed");
+                            itemStack.setItemMeta(meta);
                             return itemStack;
                         }
                     }
@@ -361,7 +359,6 @@ public interface ItemUtil {
                                     if (!patterns.isEmpty()) bannerMeta.setPatterns(patterns);
                                 }
                             } else if (meta instanceof EnchantmentStorageMeta) {
-                                //TODO: returns item without enchantment
                                 JsonElement storedEnchantsElement = extraJson.get("stored-enchants");
                                 if (storedEnchantsElement != null && storedEnchantsElement.isJsonArray()) {
                                     EnchantmentStorageMeta esmeta = (EnchantmentStorageMeta) meta;
@@ -369,15 +366,13 @@ public interface ItemUtil {
                                     jarray.forEach(jsonElement -> {
                                         if (jsonElement.isJsonPrimitive()) {
                                             String enchantString = jsonElement.getAsString();
-                                            if (enchantString.contains("//")) {
+                                            if (enchantString.contains(":")) {
                                                 try {
-                                                    String[] splitEnchant = enchantString.split("//");
-                                                    Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(splitEnchant[0]));
-                                                    int level = Integer.parseInt(splitEnchant[1]);
-                                                    if (enchantment != null && level > 0) {
-                                                        esmeta.addStoredEnchant(enchantment, level, true);
-                                                    }
+                                                    String[] splitEnchant = enchantString.split(":");
+                                                    esmeta.addStoredEnchant(Enchantment.getByKey(NamespacedKey.minecraft(splitEnchant[0])),
+                                                            Integer.parseInt(splitEnchant[1]), true);
                                                 } catch (NumberFormatException ex) {
+                                                    LunaAuction.LOGGER.warning(String.valueOf(ex));
                                                 }
                                             }
                                         }
@@ -565,11 +560,11 @@ public interface ItemUtil {
                         } catch (Exception e) {
                             return null;
                         }
-                        itemStack.setItemMeta(meta);
-
                     }
-                    return itemStack;
-                } else return itemStack;
+                    LunaAuction.LOGGER.info("ItemMeta at End: " + meta.getAsString());
+                    itemStack.setItemMeta(meta);
+                    LunaAuction.LOGGER.info("ItemStack: " + itemStack);
+                } return itemStack;
             }
         }
         return null;

@@ -21,7 +21,6 @@ public class AuctionUtil {
 
         if(resultSet.next()) {
             jsonString = resultSet.getString(1);
-            //String newjsonString = jsonString.replace(":", "=");
         }
         itemStack = ItemUtil.jsonToItem(jsonString);
         return itemStack;
