@@ -24,13 +24,12 @@ public class CommandAuction implements CommandExecutor {
            Player player = (Player) sender;
            ChatBuilder chatBuilder = new ChatBuilder();
 
-            //TODO Auction admin command (being able to copy items from auctions for testing reasons)
-            //TODO Bid command
 
             if (player.hasPermission("lunaauctions.*")) {
 
                 if(args.length > 0) {
                     if(args[0].equalsIgnoreCase("bid")) {
+                        //TODO Bid command check if new value is higher than stored value
                         try {
                             if(!args[1].isEmpty() && !args[2].isEmpty()) {
                                 CommandAuctionBid auctionBid = new CommandAuctionBid();
@@ -61,7 +60,11 @@ public class CommandAuction implements CommandExecutor {
                         }
                     } else if(args[0].equalsIgnoreCase("admin")) {
                         CommandAuctionAdmin auctionAdmin = new CommandAuctionAdmin();
-                        auctionAdmin.adminCommand(args, player);
+                        try {
+                            auctionAdmin.adminCommand(args, player);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
                     } else {
                         chatBuilder.sendWarningMessage(player, "Not a valid command!");
                     }

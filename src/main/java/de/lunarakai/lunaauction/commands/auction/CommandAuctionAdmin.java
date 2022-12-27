@@ -2,6 +2,7 @@ package de.lunarakai.lunaauction.commands.auction;
 
 import de.lunarakai.lunaauction.LunaAuction;
 import de.lunarakai.lunaauction.commands.auction.admin.CommandAdminCopy;
+import de.lunarakai.lunaauction.commands.auction.admin.CommandAdminDeserialize;
 import de.lunarakai.lunaauction.commands.auction.admin.CommandAdminSerialize;
 import de.lunarakai.lunaauction.utils.playerinteraction.ChatBuilder;
 import de.lunarakai.lunaauction.utils.playerinteraction.ItemUtil;
@@ -13,7 +14,7 @@ public class CommandAuctionAdmin {
 
     ChatBuilder chatBuilder = new ChatBuilder();
 
-    public void adminCommand(String[] args, Player player) {
+    public void adminCommand(String[] args, Player player) throws SQLException {
         if(args.length >= 2) {
             if(args[1].equalsIgnoreCase("help")) {
                 //TODO admin help page
@@ -26,14 +27,15 @@ public class CommandAuctionAdmin {
                     chatBuilder.sendWarningMessage(player, "Please enter a valid auctionId");
                     LunaAuction.LOGGER.warning(String.valueOf(e));
                 }
-
             } else if(args[1].equalsIgnoreCase("delete")) {
                 //TODO delete auction from other player
             } else if(args[1].equalsIgnoreCase("serialize")) {
                 CommandAdminSerialize adminSerialize = new CommandAdminSerialize();
                 adminSerialize.adminSerialize(ItemUtil.getItemInHand(player.getUniqueId()), player);
-            }else {
-
+            } else if(args[1].equalsIgnoreCase("deserialize")) {
+                CommandAdminDeserialize adminDeserialize = new CommandAdminDeserialize();
+                adminDeserialize.deserializeWithoutItem(args[2], player);
+            } else {
                 chatBuilder.sendWarningMessage(player, "Not a valid auction admin command");
             }
         } else {

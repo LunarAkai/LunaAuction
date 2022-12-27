@@ -16,7 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -28,7 +27,7 @@ public class AuctionCreateEvent extends Event implements Cancellable {
     private UUID uuid = null;
     private boolean isCancelled;
     private Integer playerId;
-    private Map<String, Object> itemStack;
+    private String itemStack;
     private PersistentDataContainer itemData;
     private int currentPrice = 0;
 
@@ -56,7 +55,7 @@ public class AuctionCreateEvent extends Event implements Cancellable {
 
             //Item Data from Item in Main Hand
             if(ItemUtil.getItemNBTInHand(uuid) != null){
-                this.itemStack = ItemUtil.serialize(ItemUtil.getItemInHand(uuid));
+                this.itemStack = ItemUtil.itemToJson(ItemUtil.getItemInHand(uuid));
                 this.itemData = ItemUtil.getItemNBTInHand(uuid).getPersistentDataContainer();
                 createAuctionEntry(playerId, itemStack, itemData, currentPrice);
 
@@ -97,7 +96,7 @@ public class AuctionCreateEvent extends Event implements Cancellable {
         Database.insertPlayerData("players", _Uuid, _playerName);
     }
 
-    private void createAuctionEntry(Integer _playerID, Map<String, Object> _itemStack, PersistentDataContainer _itemNBT, Integer _currentPrice) {
+    private void createAuctionEntry(Integer _playerID, String _itemStack, PersistentDataContainer _itemNBT, Integer _currentPrice) {
         Database.insertAuctionData("auctions", _playerID, _itemStack, _itemNBT, _currentPrice);
     }
 

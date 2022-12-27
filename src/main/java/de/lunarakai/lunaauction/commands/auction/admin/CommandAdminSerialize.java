@@ -10,7 +10,7 @@ public class CommandAdminSerialize {
     ChatBuilder chatBuilder = new ChatBuilder();
 
     public void adminSerialize(ItemStack item, Player player) {
-        String itemSerialized = ItemUtil.serialize(item).toString();
+        String itemSerialized = ItemUtil.itemToJson(item);
         chatBuilder.sendDefaultMessage(player, "Serialized Item: " + itemSerialized);
     }
 }
