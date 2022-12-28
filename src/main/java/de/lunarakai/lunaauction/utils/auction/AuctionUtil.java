@@ -2,6 +2,7 @@ package de.lunarakai.lunaauction.utils.auction;
 
 import de.lunarakai.lunaauction.sql.DatabaseQueries;
 import de.lunarakai.lunaauction.utils.playerinteraction.ItemUtil;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.inventory.ItemStack;
 
 import java.sql.ResultSet;
@@ -13,16 +14,14 @@ public class AuctionUtil {
         return DatabaseQueries.equalsQuery("auctionID", "auctions", "auctionID", String.valueOf(id));
     }
 
-    public static ItemStack getAuctionedItem(Integer id) throws SQLException {
+    public static ItemStack getAuctionedItem(Integer id) throws SQLException, InvalidConfigurationException {
         ItemStack itemStack;
-        String jsonString = null;
-
+        String itemString = null;
         ResultSet resultSet = DatabaseQueries.equalsQuery("itemStack", "auctions", "auctionID", String.valueOf(id));
-
         if(resultSet.next()) {
-            jsonString = resultSet.getString(1);
+            itemString = resultSet.getString(1);
         }
-        itemStack = ItemUtil.jsonToItem(jsonString);
+        itemStack = ItemUtil.stringToItem(itemString);
         return itemStack;
     }
 

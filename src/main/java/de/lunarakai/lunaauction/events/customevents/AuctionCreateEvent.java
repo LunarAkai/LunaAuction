@@ -6,6 +6,7 @@ import de.lunarakai.lunaauction.sql.DatabaseQueries;
 import de.lunarakai.lunaauction.utils.playerinteraction.ChatBuilder;
 import de.lunarakai.lunaauction.utils.playerinteraction.ItemUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -51,11 +52,11 @@ public class AuctionCreateEvent extends Event implements Cancellable {
             //get Player ID
             this.playerId = getPlayerIDInDatabase(uuid);
 
-            Player player = Objects.requireNonNull(Bukkit.getPlayer(UUID.fromString(String.valueOf(uuid))));
+            Player player = Objects.requireNonNull(Bukkit.getPlayer(uuid));
 
             //Item Data from Item in Main Hand
-            if(ItemUtil.getItemNBTInHand(uuid) != null){
-                this.itemStack = ItemUtil.itemToJson(ItemUtil.getItemInHand(uuid));
+            if(!(ItemUtil.getItemInHand(uuid).getType().equals(Material.AIR))){
+                this.itemStack = ItemUtil.itemToString(ItemUtil.getItemInHand(uuid));
                 this.itemData = ItemUtil.getItemNBTInHand(uuid).getPersistentDataContainer();
                 createAuctionEntry(playerId, itemStack, itemData, currentPrice);
 
@@ -66,17 +67,12 @@ public class AuctionCreateEvent extends Event implements Cancellable {
                 ChatBuilder chatBuilder = new ChatBuilder();
                 chatBuilder.sendSuccessMessage(player, "Auction successfully created!");
                 //chatBuilder.sendSuccessfulAuctionCreationMessage(player, itemStack, currentPrice);
-
-
             } else {
                 ChatBuilder chatBuilder = new ChatBuilder();
                 chatBuilder.sendWarningMessage(player, "You must have the item(s) you want to sell in the main hand!");
             }
-
-
             //ChatBuilder chatBuilder = new ChatBuilder();
             //chatBuilder.sendWarningMessage(Objects.requireNonNull(Bukkit.getPlayer(UUID.fromString(String.valueOf(uuid)))), "Error in auction creation.");
-
             this.isCancelled = false;
         } else {
             LunaAuction.LOGGER.warning("DATABASE ISN'T CONNECTED!");
@@ -88,7 +84,6 @@ public class AuctionCreateEvent extends Event implements Cancellable {
 
     private Integer getPlayerIDInDatabase(UUID _uuid) throws SQLException {
         playerId = Database.getIdFromTable(_uuid);
-
         return playerId;
     }
 

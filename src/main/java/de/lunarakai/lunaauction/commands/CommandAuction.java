@@ -11,6 +11,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 
 import java.io.IOException;
@@ -24,45 +25,39 @@ public class CommandAuction implements CommandExecutor {
            Player player = (Player) sender;
            ChatBuilder chatBuilder = new ChatBuilder();
 
-
             if (player.hasPermission("lunaauctions.*")) {
-
                 if(args.length > 0) {
                     if(args[0].equalsIgnoreCase("bid")) {
                         //TODO Bid command check if new value is higher than stored value
-                        try {
-                            if(!args[1].isEmpty() && !args[2].isEmpty()) {
-                                CommandAuctionBid auctionBid = new CommandAuctionBid();
+                        if(!args[1].isEmpty() && !args[2].isEmpty()) {
+                            CommandAuctionBid auctionBid = new CommandAuctionBid();
+                            try {
                                 auctionBid.bidCommand(args[1], args[2], PlayerUtil.getUuid(player));
+                            } catch (SQLException e) {
+                                //TODO
                             }
-                        } catch (ArrayIndexOutOfBoundsException e) {
-                            chatBuilder.sendErrorMessage(player, "You need to enter a valid auctionId and/or bidding price!");
                         }
                     } else if(args[0].equalsIgnoreCase("help")) {
                         chatBuilder.sendDefaultMessage(player, "there is no help");
                     } else if(args[0].equalsIgnoreCase("create")) {
+                        AuctionCreateEvent auctionCreateEvent;
                         try {
-                            AuctionCreateEvent auctionCreateEvent = new AuctionCreateEvent(player.getUniqueId(), player.getName());
+                            auctionCreateEvent = new AuctionCreateEvent(player.getUniqueId(), player.getName());
+                        } catch (SQLException | IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                        Bukkit.getPluginManager().callEvent(auctionCreateEvent);
 
-                            Bukkit.getPluginManager().callEvent(auctionCreateEvent);
-
-                            if(!auctionCreateEvent.isCancelled()) {
-                                return true;
-                            } else {
-                                return false;
-                            }
-                        } catch (SQLException e) {
-                            chatBuilder.sendErrorMessage(player, "SQLException");
-                            LunaAuction.LOGGER.warning(String.valueOf(e));
-                        } catch (IOException e) {
-                            chatBuilder.sendErrorMessage(player, "IOException");
-                            LunaAuction.LOGGER.warning(String.valueOf(e));
+                        if(!auctionCreateEvent.isCancelled()) {
+                            return true;
+                        } else {
+                            return false;
                         }
                     } else if(args[0].equalsIgnoreCase("admin")) {
                         CommandAuctionAdmin auctionAdmin = new CommandAuctionAdmin();
                         try {
                             auctionAdmin.adminCommand(args, player);
-                        } catch (SQLException e) {
+                        } catch (SQLException | InvalidConfigurationException e) {
                             throw new RuntimeException(e);
                         }
                     } else {

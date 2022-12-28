@@ -1,8 +1,8 @@
 package de.lunarakai.lunaauction.commands.auction.admin;
 
-import de.lunarakai.lunaauction.LunaAuction;
 import de.lunarakai.lunaauction.utils.auction.AuctionUtil;
 import de.lunarakai.lunaauction.utils.playerinteraction.ChatBuilder;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -13,17 +13,12 @@ public class CommandAdminCopy {
 
     ChatBuilder chatBuilder = new ChatBuilder();
 
-    public void copyItemFromAuction(String auctionId, Player player) throws SQLException {
+    public void copyItemFromAuction(String auctionId, Player player) throws SQLException, InvalidConfigurationException {
         ResultSet resultSet = AuctionUtil.getAuctionId(Integer.valueOf(auctionId));
         if(resultSet.next()) {
             //Query for ItemStack in AuctionTable and give a copy of the itemstack to the player
             ItemStack itemResult = AuctionUtil.getAuctionedItem(Integer.valueOf(auctionId));
-            try{
-                player.getInventory().addItem(itemResult);
-            } catch (IllegalArgumentException e) {
-                chatBuilder.sendWarningMessage(player, String.valueOf(e));
-                LunaAuction.LOGGER.warning(String.valueOf(e));
-            }
+            player.getInventory().addItem(itemResult);
         } else {
             chatBuilder.sendWarningMessage(player, "Not a valid auctionId");
         }

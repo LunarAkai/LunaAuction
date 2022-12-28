@@ -7,8 +7,6 @@ import java.sql.SQLException;
 
 public class DatabaseInsertion {
 
-
-
     public void insertData(String intoTable, String column1, String column2, String column3, String column4,
                            Integer id, PersistentDataContainer persistentDataContainer,
                            Integer price, String itemStack) throws SQLException {
