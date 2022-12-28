@@ -16,11 +16,17 @@ public class CommandAdminGetText {
     ChatBuilder chatBuilder = new ChatBuilder();
 
     public void getSerializedTextOfItemInHand(Player player) {
+
         ItemStack item = ItemUtil.getItemInHand(player.getUniqueId());
         LunaAuction.LOGGER.info("Item in Hand: " + item);
         if(item.getItemMeta().hasDisplayName()) {
             String stringItem = customTextSerializer.serialize(Objects.requireNonNull(item.getItemMeta().displayName()));
-            chatBuilder.sendDefaultMessage(player, "Serialized ItemString: " + ChatColor.GOLD + stringItem);
+            if(stringItem != null && !(stringItem.isEmpty())) {
+                chatBuilder.sendDefaultMessage(player, "Serialized ItemString: " + ChatColor.GOLD + stringItem);
+            } else {
+                chatBuilder.sendDefaultMessage(player, "Serialized ItemString: " + ChatColor.GOLD + "ItemString is empty :(");
+            }
+
         } else {
             chatBuilder.sendWarningMessage(player, "Item has no custom display name");
         }

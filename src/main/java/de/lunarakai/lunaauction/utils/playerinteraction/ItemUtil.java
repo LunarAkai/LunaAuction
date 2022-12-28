@@ -1,28 +1,29 @@
 package de.lunarakai.lunaauction.utils.playerinteraction;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
 import de.lunarakai.lunaauction.LunaAuction;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.ComponentBuilder;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.TranslatableComponent;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.*;
-import org.bukkit.block.banner.PatternType;
+import org.bukkit.block.Banner;
 import org.bukkit.block.banner.Pattern;
+import org.bukkit.block.banner.PatternType;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.*;
+import org.bukkit.map.MapCanvas;
+import org.bukkit.map.MapRenderer;
+import org.bukkit.map.MapView;
 import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
-import org.jetbrains.annotations.NotNull;
+import org.json.simple.JSONArray;
 
 import java.util.*;
 
@@ -48,8 +49,13 @@ public interface ItemUtil {
             ItemMeta meta = item.getItemMeta();
 
             if (meta.hasDisplayName()) {
-                PlainTextComponentSerializer plainTextComponentSerializer = PlainTextComponentSerializer.builder().build();
-                metaJson.addProperty("displayname", plainTextComponentSerializer.serialize(item.displayName()));
+                if(item.displayName().equals(Component.translatable("block.minecraft.ominous_banner"))) {
+                    metaJson.addProperty("displayname",item.translationKey());
+                } else {
+                    LegacyComponentSerializer legacyComponentSerializer = LegacyComponentSerializer.builder().build();
+                    metaJson.addProperty("displayname", legacyComponentSerializer.serialize(item.displayName()));
+                }
+
             }
             if (meta.hasLore()) {
                 JsonArray lore = new JsonArray();
@@ -71,9 +77,12 @@ public interface ItemUtil {
             }
 
             for (String clazz : BYPASS_CLASS) {
-                if (meta.getClass().getSimpleName().equals(clazz)) {
+                if (meta.getClass().getSimpleName().equals(clazz) && !(item.getType().equals(Material.SHIELD))) {
+
                     itemJson.add("item-meta", metaJson);
                     return gson.toJson(itemJson);
+                } else {
+                    break;
                 }
             }
 
@@ -84,7 +93,24 @@ public interface ItemUtil {
                     extrMeta.addProperty("owner", skullMeta.getOwner());
                     metaJson.add("extra-meta", extrMeta);
                 }
-            } else if (meta instanceof BannerMeta) {
+            } else if(item.getType().equals(Material.SHIELD)) {
+                BlockStateMeta  bmeta = (BlockStateMeta) meta;
+                JsonObject extraMeta = new JsonObject();
+                Banner banner = (Banner) bmeta.getBlockState();
+
+                extraMeta.addProperty("color", banner.getBaseColor().toString());
+
+                if (banner.numberOfPatterns() > 0) {
+                    JsonArray patterns = new JsonArray();
+                    banner.getPatterns()
+                                .stream()
+                                .map(pattern ->
+                                        pattern.getColor().name() + ":" + pattern.getPattern().getIdentifier())
+                                .forEach(str -> patterns.add(new JsonPrimitive(str)));
+                        extraMeta.add("patterns", patterns);
+                }
+                metaJson.add("extra-meta", extraMeta);
+            }else if (meta instanceof BannerMeta) {
                 BannerMeta bannerMeta = (BannerMeta) meta;
                 JsonObject extraMeta = new JsonObject();
                 //extraMeta.addProperty("base-color", bannerMeta.getBaseColor().name());
@@ -219,10 +245,23 @@ public interface ItemUtil {
                 }
                 metaJson.add("extra-meta", extraMeta);
             } else if (meta instanceof MapMeta) {
-                //TODO: returns used but empty map
                 MapMeta mapMeta = (MapMeta) meta;
                 JsonObject extraMeta = new JsonObject();
 
+                if(mapMeta.hasMapView()) {
+                    JsonArray mapView = new JsonArray();
+                    mapView.add(mapMeta.getMapView().getWorld().getUID().toString());
+                    mapView.add(mapMeta.getMapView().getId());
+                    mapView.add(mapMeta.getMapView().getCenterX());
+                    mapView.add(mapMeta.getMapView().getCenterZ());
+                    mapView.add(mapMeta.getMapView().getScale().toString());
+                    extraMeta.add("map-view", mapView);
+                }
+                if(mapMeta.getMapView().getRenderers() != null) {
+
+                    JsonArray rendererArray = null;
+                    LunaAuction.LOGGER.info("Map has renderers o.O");
+                }
                 if (mapMeta.hasLocationName()) {
                     extraMeta.addProperty("location-name", mapMeta.getLocationName());
                 }
@@ -236,8 +275,6 @@ public interface ItemUtil {
             }
             itemJson.add("item-meta", metaJson);
         }
-
-
         return gson.toJson(itemJson);
     }
 
@@ -272,12 +309,30 @@ public interface ItemUtil {
                     JsonElement enchants = metaJson.get("enchants");
                     JsonElement flagsElement = metaJson.get("flags");
                     if (displayNameElement != null && displayNameElement.isJsonPrimitive()) {
-                        //TODO: item name isn't displayed correctly (doesnt effect signed books - works for them)
                         //TODO: show text for TranslatableComponent (for example Omnious Banner) correctly
-                        //TODO: doesnt set item name for named tools, however the data is set in the database
 
-                        PlainTextComponentSerializer plainTextComponentSerializer = PlainTextComponentSerializer.plainText();
-                        meta.displayName(plainTextComponentSerializer.deserialize(displayNameElement.getAsString()));
+                        LegacyComponentSerializer legacyComponentSerializer = LegacyComponentSerializer.legacyAmpersand();
+                        /*
+                           try{
+                               if(displayNameElement.equals("block.minecraft.ominous_banner")) {
+                               }
+                           } catch(Exception e) {
+
+                           }
+
+                        if(displayNameElement.equals(Component.translatable("block.minecraft.ominous_banner"))) {
+                            NamespacedKey key = NamespacedKey.minecraft("block.minecraft.ominous_banner");
+                            meta.displayName() = key.value();
+                        } else {
+
+                        }
+
+                        */
+                        String displayString = displayNameElement.getAsString();
+                        displayString = displayString.replaceAll("[\\[\\]]", "");
+                        TextComponent displayName = legacyComponentSerializer.deserialize(displayString);
+
+                        meta.displayName(displayName);
                     }
                     if (loreElement != null && loreElement.isJsonArray()) {
                         JsonArray jsonArray = loreElement.getAsJsonArray();
@@ -318,10 +373,12 @@ public interface ItemUtil {
                         });
                     }
                     for (String clazz : BYPASS_CLASS) {
-                        if (meta.getClass().getSimpleName().equalsIgnoreCase(clazz)) {
+                        if (meta.getClass().getSimpleName().equalsIgnoreCase(clazz) && !(itemStack.getType().equals(Material.SHIELD))) {
                             LunaAuction.LOGGER.info("Extra-meta is getting bypassed");
                             itemStack.setItemMeta(meta);
                             return itemStack;
+                        } else {
+                            break;
                         }
                     }
 
@@ -336,6 +393,35 @@ public interface ItemUtil {
                                     SkullMeta skullMeta = (SkullMeta) meta;
                                     skullMeta.setOwner(ownerElement.getAsString());
                                 }
+                            } else if(itemStack.getType().equals(Material.SHIELD)) {
+                                BlockStateMeta blockStateMeta = (BlockStateMeta) meta;
+                                Banner banner = (Banner) blockStateMeta.getBlockState();
+                                JsonElement patternsElement = extraJson.get("patterns");
+                                JsonElement colorElement = extraJson.get("color");
+
+                                banner.setBaseColor(DyeColor.valueOf(colorElement.getAsString()));
+
+                                if (patternsElement != null && patternsElement.isJsonArray()) {
+                                    JsonArray jarray = patternsElement.getAsJsonArray();
+                                    List<Pattern> patterns = new ArrayList<>(jarray.size());
+                                    jarray.forEach(jsonElement -> {
+                                        String patternString = jsonElement.getAsString();
+                                        if (patternString.contains(":")) {
+                                            String[] splitPattern = patternString.split(":");
+                                            Optional<DyeColor> color = Arrays.stream(DyeColor.values())
+                                                    .filter(dyeColor -> dyeColor.name().equalsIgnoreCase(splitPattern[0]))
+                                                    .findFirst();
+                                            PatternType patternType = PatternType.getByIdentifier(splitPattern[1]);
+                                            if (color.isPresent() && patternType != null) {
+                                                patterns.add(new Pattern(color.get(), patternType));
+                                            }
+                                        }
+                                    });
+                                    if (!patterns.isEmpty()) banner.setPatterns(patterns);
+                                    banner.update();
+                                    blockStateMeta.setBlockState(banner);
+                                }
+
                             } else if (meta instanceof BannerMeta) {
                                 //JsonElement baseColorElement = extraJson.get("base-color");
                                 JsonElement patternsElement = extraJson.get("patterns");
@@ -544,6 +630,60 @@ public interface ItemUtil {
                             } else if (meta instanceof MapMeta) {
                                 MapMeta mmeta = (MapMeta) meta;
 
+                                JsonArray mapView = extraJson.getAsJsonArray("map-view");
+
+                                if(mapView != null && mapView.isJsonArray()) {
+                                    JsonArray mapArray = mapView.getAsJsonArray();
+                                    if(!(mapArray.isEmpty())) {
+                                        LunaAuction.LOGGER.info("MapArray: " + mapArray);
+                                        LunaAuction.LOGGER.info("MapArray: " + mapArray.get(0));
+                                        LunaAuction.LOGGER.info("MapArray: " + mapArray.get(1));
+                                        LunaAuction.LOGGER.info("MapArray: " + mapArray.get(2));
+                                        LunaAuction.LOGGER.info("MapArray: " + mapArray.get(3));
+                                        LunaAuction.LOGGER.info("MapArray: " + mapArray.get(4));
+                                        LunaAuction.LOGGER.info("World: " + mapArray.get(0));
+
+                                        String stringWorld = String.valueOf(mapArray.get(0));
+                                        UUID uuid = UUID.fromString(stringWorld.substring(1, stringWorld.length()-1));
+                                        //TODO: different map ID
+                                        //TODO: player not trackable on map (if map should do it)
+                                        try {
+                                            MapView view = Bukkit.createMap(Bukkit.getWorld(uuid));
+                                            LunaAuction.LOGGER.info("World: " + view.getWorld());
+                                            mmeta.setMapId(mapArray.get(1).getAsInt());
+                                            MapCanvas canvas;
+                                            // mmeta.setColor();
+                                            view.setCenterX(Integer.parseInt(String.valueOf(mapArray.get(2))));
+                                            view.setCenterZ(Integer.parseInt(String.valueOf(mapArray.get(3))));
+
+                                            //mmeta.getMapView().setCenterX(Integer.parseInt(String.valueOf(mapArray.get(2))));
+                                            LunaAuction.LOGGER.info("CenterX: " + view.getCenterX());
+
+                                            //mmeta.getMapView().setCenterZ(Integer.parseInt(String.valueOf(mapArray.get(3))));
+                                            LunaAuction.LOGGER.info("CenterZ: " + view.getCenterZ());
+
+                                            if(mapArray.get(4) != null) {
+                                                if(mapArray.get(4).getAsString().contains("CLOSEST")) {
+                                                    view.setScale(MapView.Scale.CLOSEST);
+                                                } else if(mapArray.get(4).getAsString().contains("CLOSE")) {
+                                                    view.setScale(MapView.Scale.CLOSE);
+                                                } else if(mapArray.get(4).getAsString().contains("NORMAL")) {
+                                                    view.setScale(MapView.Scale.NORMAL);
+                                                } else if(mapArray.get(4).getAsString().contains("FARTHEST")) {
+                                                    view.setScale(MapView.Scale.FARTHEST);
+                                                } else if(mapArray.get(4).getAsString().contains("FAR")) {
+                                                    view.setScale(MapView.Scale.FAR);
+                                                }
+                                            }
+                                            LunaAuction.LOGGER.info("Scaling: " + view.getScale());
+
+                                            mmeta.setMapView(view);
+
+                                        } catch (Exception e) {
+                                            LunaAuction.LOGGER.warning(e + "\n" + Arrays.toString(e.getStackTrace() ));
+                                        }
+                                    }
+                                }
                                 JsonElement scalingElement = extraJson.get("scaling");
                                 if (scalingElement != null && scalingElement.isJsonPrimitive()) {
                                     mmeta.setScaling(scalingElement.getAsBoolean());
@@ -561,7 +701,6 @@ public interface ItemUtil {
                             return null;
                         }
                     }
-                    LunaAuction.LOGGER.info("ItemMeta at End: " + meta.getAsString());
                     itemStack.setItemMeta(meta);
                     LunaAuction.LOGGER.info("ItemStack: " + itemStack);
                 } return itemStack;
@@ -581,5 +720,23 @@ public interface ItemUtil {
         ItemStack item = player.getInventory().getItemInMainHand();
 
         return item.getItemMeta();
+    }
+
+    static byte[][] mapToBytes(MapCanvas canvas) {
+        byte[][] bytes = new byte[128][128];
+        for(int i = 0; i < bytes.length; i++) {
+            for(int j = 0; j < bytes.length; j++) {
+                bytes[i][j] = canvas.getPixel(i,j);
+            }
+        }
+        return bytes;
+    }
+
+    static void mapFromBytes(MapCanvas canvas, byte[][] bytes) {
+        for (int i = 0; i < bytes.length; i++) {
+            for (int j = 0; j < bytes[i].length; j++) {
+                canvas.setPixel(i, j, bytes[i][j]);
+            }
+        }
     }
 }

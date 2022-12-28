@@ -20,7 +20,6 @@ public class CommandAuctionAdmin {
             if(args[1].equalsIgnoreCase("help")) {
                 //TODO admin help page
             } else if(args[1].equalsIgnoreCase("copy")) {
-                //TODO copy item from auction
                 try {
                     CommandAdminCopy adminCopy = new CommandAdminCopy();
                     adminCopy.copyItemFromAuction(args[2], player);
